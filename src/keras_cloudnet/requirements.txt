@@ -1,0 +1,7 @@
+keras
+numpy
+pandas
+scikit-image
+sklearn
+tifffile
+tqdl
