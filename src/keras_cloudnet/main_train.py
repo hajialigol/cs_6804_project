@@ -4,12 +4,12 @@ from sklearn.model_selection import train_test_split
 from pathlib import Path
 import numpy as np
 from cs_6804_project.src.keras_cloudnet import cloud_net_model
-from cs_6804_project.src.keras_cloudnet import jacc_coef
+from cs_6804_project.src.keras_cloudnet.losses import jacc_coef
 from keras.optimizers import Adam
 from keras.callbacks import ModelCheckpoint, ReduceLROnPlateau, CSVLogger
-from cs_6804_project.src.keras_cloudnet import mybatch_generator_train, mybatch_generator_validation
+from cs_6804_project.src.keras_cloudnet.generators import mybatch_generator_train, mybatch_generator_validation
 import pandas as pd
-from cs_6804_project.src.keras_cloudnet import get_input_image_names, ADAMLearningRateTracker
+from cs_6804_project.src.keras_cloudnet.utils import get_input_image_names, ADAMLearningRateTracker
 
 
 def train():
@@ -73,7 +73,7 @@ weights_path = GLOBAL_PATH / weights_partial
 train_resume = False
 
 # getting input images names
-train_patches_csv_name = 'training_patches_38-Cloud.csv'
+train_patches_csv_name = 'training_patches_38-cloud_nonempty.csv'
 df_train_img = pd.read_csv(TRAIN_FOLDER / train_patches_csv_name)
 # df_train_img = pd.read_csv(os.path.join(TRAIN_FOLDER, train_patches_csv_name))
 train_img, train_msk = get_input_image_names(df_train_img, TRAIN_FOLDER, if_train=True)
