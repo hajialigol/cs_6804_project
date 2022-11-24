@@ -9,12 +9,7 @@ Some lines borrowed from: https://www.kaggle.com/sashakorekov/end-to-end-resnet5
 
 def rotate_clk_img_and_msk(img, msk):
     angle = np.random.choice((4, 6, 8, 10, 12, 14, 16, 18, 20))
-    print(img[:,:,0].shape)
-    print(msk.shape)
-    #img_o = trans.rotate(img, angle, resize=False, preserve_range=True, mode='symmetric', order=0)
-    img_o = img.copy()
-    for idx in range(img.shape[2]):
-        img_o[:,:,idx] = trans.rotate(img[:,:,idx], angle, resize=False, preserve_range=True, mode='symmetric', order=0)
+    img_o = trans.rotate(img, angle, resize=False, preserve_range=True, mode='symmetric', order=0)
     msk_o = trans.rotate(msk, angle, resize=False, preserve_range=True, mode='symmetric', order=0)
     return img_o, msk_o
 
