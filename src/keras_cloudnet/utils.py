@@ -2,6 +2,7 @@ import keras
 import keras.backend as K
 from tqdm import tqdm
 
+
 class ADAMLearningRateTracker(keras.callbacks.Callback):
     """It prints out the last used learning rate after each epoch (useful for resuming a training)
     original code: https://github.com/keras-team/keras/issues/7874#issuecomment-329347949
@@ -39,7 +40,7 @@ def get_input_image_names(list_names, directory_name, if_train=True):
             dir_type_name = "train"
             fl_img = []
             nmask = 'gt_' + filenames
-            fl_msk = directory_name + '/train_gt/' + '{}.TIF'.format(nmask)
+            fl_msk = directory_name / 'train_gt' / '{}.TIF'.format(nmask)
             list_msk.append(fl_msk)
 
         else:
@@ -48,10 +49,14 @@ def get_input_image_names(list_names, directory_name, if_train=True):
             fl_id = '{}.TIF'.format(filenames)
             list_test_ids.append(fl_id)
 
-        fl_img_red = directory_name + '/' + dir_type_name + '_red/' + '{}.TIF'.format(nred)
-        fl_img_green = directory_name + '/' + dir_type_name + '_green/' + '{}.TIF'.format(ngreen)
-        fl_img_blue = directory_name + '/' + dir_type_name + '_blue/' + '{}.TIF'.format(nblue)
-        fl_img_nir = directory_name + '/' + dir_type_name + '_nir/' + '{}.TIF'.format(nnir)
+        red_dir_type_name = dir_type_name + '_red/'
+        green_dir_type_name = dir_type_name + '_green/'
+        blue_dir_type_name = dir_type_name + '_blue/'
+        nir_dir_type_name = dir_type_name + '_nir/'
+        fl_img_red = directory_name / red_dir_type_name / '{}.TIF'.format(nred)
+        fl_img_green = directory_name / green_dir_type_name / '{}.TIF'.format(ngreen)
+        fl_img_blue = directory_name / blue_dir_type_name / '{}.TIF'.format(nblue)
+        fl_img_nir = directory_name / nir_dir_type_name / '{}.TIF'.format(nnir)
         fl_img.append(fl_img_red)
         fl_img.append(fl_img_green)
         fl_img.append(fl_img_blue)
