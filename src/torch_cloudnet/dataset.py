@@ -57,7 +57,9 @@ class CloudDataset(Dataset):
         if rnd_zoom == 1:
             images, target = zoom_img_and_msk(images, target)
 
-        target /= 255
-        images /= self.max_bit
+        # target /= 255
+        target = np.divide(target, 255)
+        # images /= self.max_bit
+        images = np.divide(images, self.max_bit)
         return images, target
 
