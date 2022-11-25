@@ -42,9 +42,10 @@ if __name__ == "__main__":
     # getting input images names
     train_patches_csv_name = 'training_patches_38-cloud_nonempty.csv'
     df_train_img = pd.read_csv(TRAIN_FOLDER / train_patches_csv_name)
-    # df_train_img = pd.read_csv(os.path.join(TRAIN_FOLDER, train_patches_csv_name))
 
     train_img, train_msk = get_input_image_names(df_train_img, TRAIN_FOLDER, if_train=True)
+    # train_img = train_img[:100]
+    # train_msk = train_msk[:100]
 
     # Split data into training and validation
     train_img_split, val_img_split, train_msk_split, val_msk_split = train_test_split(
@@ -56,6 +57,7 @@ if __name__ == "__main__":
     ds_val = CloudDataset(val_img_split, val_msk_split, in_rows, in_cols, max_bit)
 
     train_dataloader = DataLoader(ds_train, batch_size=4, shuffle=False)
-    test_dataloader = DataLoader(ds_val, batch_size=4, shuffle=False)
+    val_dataloader = DataLoader(ds_val, batch_size=4, shuffle=False)
     model = CloudNet()
-    train(model=model, data_loader=train_dataloader, args=training_args)
+    train(model=model, train_data=train_dataloader, args=training_args,
+          val_data=val_dataloader)
