@@ -17,25 +17,45 @@ class ConvBlock(nn.Module):
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.num_convs = num_convs
-        self.conv = nn.Conv2d(
+        self.conv_1 = nn.Conv2d(
             in_channels=in_channels,
             out_channels=out_channels,
-            kernel_size=(kernel_size, kernel_size)
+            kernel_size=(kernel_size, kernel_size),
+            padding='same'
+        )
+        self.conv_2 = nn.Conv2d(
+            in_channels=out_channels,
+            out_channels=out_channels,
+            kernel_size=(kernel_size, kernel_size),
+            padding='same'
         )
         self.relu = nn.ReLU(inplace=False)
         self.batch_norm = nn.BatchNorm2d(out_channels)
-        self.conv_batch_relu = nn.Sequential(
-            self.conv,
+        self.conv_batch_relu_1 = nn.Sequential(
+            self.conv_1,
+            self.batch_norm,
+            self.relu
+        )
+        self.conv_batch_relu_1 = nn.Sequential(
+            self.conv_2,
             self.batch_norm,
             self.relu
         )
 
     def forward(self, x):
-        x = self.conv_batch_relu(x)
-        x = self.conv_batch_relu(x)
+        x = self.conv_1(x)
+        x = self.batch_norm(x)
+        x = self.relu(x)
+
+        x = self.conv_2(x)
+        x = self.batch_norm(x)
+        x = self.relu(x)
+
         if self.num_convs == 3:
             # do it for the third time
-            x = self.conv_batch_relu(x)
+            x = self.conv_2(x)
+            x = self.batch_norm(x)
+            x = self.relu(x)
         return x
 
 
@@ -64,9 +84,9 @@ class ImproveFFBlock(nn.Module):
 
     def skip_connection(self, layer, tensor, block_num):
         input_tensor = layer(tensor)
-        x = layer(input_tensor)
+        x = layer(tensor)
         for i in range(block_num):
-            x = concat((x, input_tensor), dim=3)
+            x = concat((x, input_tensor), dim=1)
         return x
 
     def forward(
@@ -82,13 +102,12 @@ class ImproveFFBlock(nn.Module):
                 self.max_pool_1(input_tensor1),
                 self.max_pool_1(input_tensor1),
             ),
-            dim=3
+            dim=1
         )
 
         # check if functionality should be with only one input
         if self.block1:
-            x1 = add(x1, pure_ff)
-            x = self.max_pool_1(x1)
+            x = add(x1, pure_ff)
 
         elif self.block2:
             x2 = self.skip_connection(layer=self.max_pool_2, tensor=input_tensor2, block_num=3)
