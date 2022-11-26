@@ -1,9 +1,10 @@
 from datetime import datetime
 from pathlib import Path
 from sklearn.metrics import precision_recall_fscore_support,\
-    jaccard_score, accuracy_score, recall_score
+    accuracy_score, recall_score
 from torch import optim, save
 from torch.utils.data import DataLoader
+from torchmetrics import JaccardIndex
 from tqdm import tqdm
 from cs_6804_project.src.torch_cloudnet.model import CloudNet
 from cs_6804_project.src.torch_cloudnet.arguments import TrainingArguments
@@ -76,21 +77,20 @@ def eval(model: CloudNet, val_data: DataLoader):
         "specificity": 0,
         "accuracy": 0
     }
+    jaccard = JaccardIndex(num_classes=2)
     for data in tqdm(val_data):
-        batch_ims, labels = data
-        results = model(batch_ims).detach().numpy().flatten()
+        batch_ims, targets = data
+        outputs = model(batch_ims)
+        results = outputs.detach().numpy().flatten()
         results = np.where(results > 0.5, 1, 0)
-        labels = labels.detach().numpy().flatten()
+        labels = targets.detach().numpy().flatten()
         eval_metric = precision_recall_fscore_support(
             y_pred=results,
             y_true=labels
         )
         eval_dict['precision'] += eval_metric[0][1]
         eval_dict['recall'] += eval_metric[1][1]
-        eval_dict['specificity'] += jaccard_score(
-            y_pred=results,
-            y_true=labels
-        )
+        eval_dict['jaccard'] += jaccard(batch_ims, outputs.int()).item()
         eval_dict['accuracy'] += accuracy_score(
             y_pred=results,
             y_true=labels
