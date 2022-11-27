@@ -44,8 +44,8 @@ if __name__ == "__main__":
     df_train_img = pd.read_csv(TRAIN_FOLDER / train_patches_csv_name)
 
     train_img, train_msk = get_input_image_names(df_train_img, TRAIN_FOLDER, if_train=True)
-    # train_img = train_img[:100]
-    # train_msk = train_msk[:100]
+    train_img = train_img[:100]
+    train_msk = train_msk[:100]
 
     # Split data into training and validation
     train_img_split, val_img_split, train_msk_split, val_msk_split = train_test_split(

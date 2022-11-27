@@ -82,7 +82,7 @@ def eval(model: CloudNet, val_data: DataLoader):
         batch_ims, targets = data
         outputs = model(batch_ims)
         results = outputs.detach().numpy().flatten()
-        results = np.where(results > 0.5, 1, 0)
+        results = np.where(results > 0.05, 1, 0)
         labels = targets.detach().numpy().flatten()
         eval_metric = precision_recall_fscore_support(
             y_pred=results,
