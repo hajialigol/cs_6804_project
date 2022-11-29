@@ -172,7 +172,7 @@ class MFPCloudNet(nn.Module):
         conv_1_rgb = conv_1_rgb + conv_1_nir
 
         conv_2_rgb, pool_2_rgb = self.contracting_2_rgb(pool_1_rgb)
-        conv_2_nir, pool_2_nir = self.contracting_1_nir(pool_1_nir)
+        conv_2_nir, pool_2_nir = self.contracting_2_nir(pool_1_nir)
         conv_2_rgb = conv_2_rgb + conv_2_nir
         pool_2_rgb = pool_2_rgb + pool_2_nir
 

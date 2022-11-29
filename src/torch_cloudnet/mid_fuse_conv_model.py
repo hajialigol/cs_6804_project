@@ -177,22 +177,22 @@ class MFCCloudNet(nn.Module):
         conv_1_rgb = conv_1_rgb + conv_1_nir
         pool_1_rgb = self.max_pool_1_rgb(conv_1_rgb)
 
-        conv_2_rgb, pool_2_rgb = self.contracting_2_rgb(pool_1_rgb)
-        conv_2_nir, pool_2_nir = self.contracting_1_nir(pool_1_nir)
+        conv_2_rgb = self.contracting_2_rgb(pool_1_rgb)
+        conv_2_nir, pool_2_nir = self.contracting_2_nir(pool_1_nir)
         conv_2_rgb = conv_2_rgb + conv_2_nir
         pool_2_rgb = self.max_pool_2_rgb(conv_2_rgb)
 
-        conv_3_rgb, pool_3_rgb = self.contracting_3_rgb(pool_2_rgb)
+        conv_3_rgb = self.contracting_3_rgb(pool_2_rgb)
         conv_3_nir, pool_3_nir = self.contracting_3_nir(pool_2_nir)
         conv_3_rgb = conv_3_rgb + conv_3_nir
         pool_3_rgb = self.max_pool_3_rgb(conv_3_rgb)
 
-        conv_4_rgb, pool_4_rgb = self.contracting_4_rgb(pool_3_rgb)
+        conv_4_rgb = self.contracting_4_rgb(pool_3_rgb)
         conv_4_nir, pool_4_nir = self.contracting_4_nir(pool_3_nir)
         conv_4_rgb = conv_4_rgb + conv_4_nir
         pool_4_rgb = self.max_pool_4_rgb(conv_4_rgb)
 
-        conv_5_rgb, pool_5_rgb = self.improved_contracting_rgb(pool_4_rgb)
+        conv_5_rgb = self.improved_contracting_rgb(pool_4_rgb)
         conv_5_nir, pool_5_nir = self.improved_contracting_nir(pool_4_nir)
         conv_5_rgb = conv_5_rgb + conv_5_nir
         pool_5_rgb = self.max_pool_5_rgb(conv_5_rgb)
