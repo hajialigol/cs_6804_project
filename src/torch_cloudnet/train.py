@@ -2,9 +2,11 @@ from datetime import datetime
 from pathlib import Path
 from sklearn.metrics import precision_recall_fscore_support,\
     accuracy_score, recall_score
-from torch import optim, save
+from torch import optim, save, tensor
 from torch.utils.data import DataLoader
-from torchmetrics import JaccardIndex
+from torch.nn import Module
+from torchmetrics.classification import BinaryJaccardIndex
+from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 from cs_6804_project.src.torch_cloudnet.model import CloudNet
 from cs_6804_project.src.torch_cloudnet.arguments import TrainingArguments
@@ -13,12 +15,16 @@ import numpy as np
 import logging
 
 
-def train(model: CloudNet, train_data: DataLoader, val_data: DataLoader,
-          args: TrainingArguments):
+def train(model: CloudNet, criterion: Module, writer: SummaryWriter,
+          train_data: DataLoader, val_data: DataLoader, args):
     """
     High-level method responsible for training CloudNet model
     :param model: Model that the given data will be trained on
     :type model: CloudNet
+    :param criterion: Loss function to be used in model training
+    :type criterion: Module
+    :param writer: Writer for the TensorBoard
+    :type criterion: SummaryWriter
     :param data_loader: Dataset used in training
     :type data_loader: DataLoader
     :param args: Arguments specified by the user for training
@@ -33,7 +39,6 @@ def train(model: CloudNet, train_data: DataLoader, val_data: DataLoader,
         filemode='w',
         level=logging.DEBUG
     )
-    running_loss = 0
     optimizer = optim.SGD(
         model.parameters(),
         lr=args['learning_rate'],
@@ -42,30 +47,44 @@ def train(model: CloudNet, train_data: DataLoader, val_data: DataLoader,
     # gets rid of the 'Expected object of scalar type Double but got Float' error
     model = model.float()
     model.train()
-    i = 0
-    for epoch in range(args['iterations']):
+    criterion = criterion.to(args['device'])
+    running_loss = 0.0
+    model_save_iters = 500
+    record_loss_iters = 50
+    iterations = args['iterations']
+    i = 1
+    for epoch in range(iterations):
         model = model.to(args['device'])
+        writer.flush()
         for data in tqdm(train_data):
             batch_ims, labels = data
             batch_ims = batch_ims.to(args['device'])
             optimizer.zero_grad()
             outputs = model(batch_ims).to('cpu')
-            loss = jacc_coef_pt(y_true=labels, y_pred=outputs)
+            loss = criterion(y_true=labels, y_pred=outputs)
             loss.backward()
             optimizer.step()
             running_loss += loss.item()
-            if i % 500 == 0:  # print every 2000 mini-batches
-                print(f'iteration {i} loss: {running_loss / 50:.3f}')
-                running_loss = 0.0
+            if i % record_loss_iters == 0:
+                running_loss /= record_loss_iters
+                writer.add_scalar("Training Loss", running_loss, i // record_loss_iters)
+                running_loss = 0
+            if i % model_save_iters == 0:
                 path_name = f'../../models/cloudnet_epoch_{epoch}_iteration_{i}.pt'
                 # create directory, if already existant
                 Path('../../models').mkdir(parents=True, exist_ok=True)
                 save(model.state_dict(), path_name)
+                print(f'Saved model after {i} batches.')
             i += 1
+        # Evaluate and save fully trained model
         eval_metric = eval(model, val_data)
         logging.debug(f'after epoch {epoch}, validation results are: {eval_metric}')
         print(f'average similarity for iteration {i} is {eval_metric}')
-
+        path_name = f'../../models/cloudnet_epoch_{iterations}_final.pt'
+        # create directory, if already existant
+        Path('../../models').mkdir(parents=True, exist_ok=True)
+        save(model.state_dict(), path_name)
+        print(f'Saved fully trained model.')
 
 def eval(model: CloudNet, val_data: DataLoader):
     model.eval()
@@ -77,20 +96,20 @@ def eval(model: CloudNet, val_data: DataLoader):
         "specificity": 0,
         "accuracy": 0
     }
-    jaccard = JaccardIndex(num_classes=2)
+    jaccard = BinaryJaccardIndex()
     for data in tqdm(val_data):
         batch_ims, targets = data
         outputs = model(batch_ims)
         results = outputs.detach().numpy().flatten()
         results = np.where(results > 0.05, 1, 0)
-        labels = targets.detach().numpy().flatten()
+        labels = targets.detach().int().numpy().flatten()
         eval_metric = precision_recall_fscore_support(
             y_pred=results,
             y_true=labels
         )
         eval_dict['precision'] += eval_metric[0][1]
         eval_dict['recall'] += eval_metric[1][1]
-        eval_dict['jaccard'] += jaccard(batch_ims, outputs.int()).item()
+        eval_dict['jaccard'] += jaccard(tensor(results), tensor(labels)).item()
         eval_dict['accuracy'] += accuracy_score(
             y_pred=results,
             y_true=labels

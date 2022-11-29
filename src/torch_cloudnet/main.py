@@ -2,11 +2,13 @@ import pandas as pd
 from torch.utils.data import DataLoader
 from pathlib import Path
 from sklearn.model_selection import train_test_split
+from torch.utils.tensorboard import SummaryWriter
 from cs_6804_project.src.keras_cloudnet.utils import get_input_image_names
 from cs_6804_project.src.torch_cloudnet.dataset import CloudDataset
 from cs_6804_project.src.torch_cloudnet.model import CloudNet
 from cs_6804_project.src.torch_cloudnet.arguments import TrainingArguments
 from cs_6804_project.src.torch_cloudnet.train import train
+from cs_6804_project.src.torch_cloudnet.losses import JaccardLoss
 from argparse import ArgumentParser
 
 if __name__ == "__main__":
@@ -21,6 +23,8 @@ if __name__ == "__main__":
     GLOBAL_PATH = Path('../../data')
     TRAIN_FOLDER = GLOBAL_PATH / '38-Cloud_training'
     TEST_FOLDER = GLOBAL_PATH / '38-Cloud_test'
+    LOG_DIR = "you must choose a path wisely, Daniel"
+    writer = SummaryWriter(log_dir=LOG_DIR)
     in_rows = 192
     in_cols = 192
     num_of_channels = 4
@@ -59,5 +63,6 @@ if __name__ == "__main__":
     train_dataloader = DataLoader(ds_train, batch_size=4, shuffle=False)
     val_dataloader = DataLoader(ds_val, batch_size=4, shuffle=False)
     model = CloudNet()
-    train(model=model, train_data=train_dataloader, args=training_args,
-          val_data=val_dataloader)
+    criterion = JaccardLoss()
+    train(model=model, criterion=criterion, writer=writer,
+          train_data=train_dataloader, args=training_args, val_data=val_dataloader)

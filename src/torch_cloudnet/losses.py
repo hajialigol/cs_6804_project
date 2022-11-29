@@ -1,9 +1,19 @@
 import torch
+import torch.nn as nn
 
-smooth = 0.0000001
+class JaccardLoss(nn.Module):
+    def __init__(self, smooth = 0.0000001):
+        super().__init__()
+        self.smooth = smooth
 
-def jaccard_coef(y_true, y_pred):
-    y_true_f = torch.flatten(y_true)
-    y_pred_f = torch.flatten(y_pred)
-    intersection = torch.sum(y_true_f * y_pred_f)
-    return 1 - ((intersection + smooth) / (torch.sum(y_true_f) + torch.sum(y_pred_f) - intersection + smooth))
+    def forward(self, y_true, y_pred):  
+        y_true = torch.flatten(y_true)
+        y_pred = torch.flatten(y_pred)
+        
+        intersection = torch.sum(y_true * y_pred)
+        total = torch.sum(y_true) + torch.sum(y_pred)
+        union = total - intersection 
+        
+        jacc = (intersection + self.smooth)/(union + self.smooth)
+                
+        return 1 - jacc
