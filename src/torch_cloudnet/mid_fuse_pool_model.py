@@ -2,9 +2,10 @@ from cs_6804_project.src.torch_cloudnet.expanding_arm import *
 from cs_6804_project.src.torch_cloudnet.contracting_arm import *
 
 
-class MFCloudNet(nn.Module):
+class MFPCloudNet(nn.Module):
     """
     Torch module responsible for representing the middle-fusion CloudNet architecture
+    Adds pooling layers to fuse along contracting arm
     """
     def __init__(self, n_classes=1):
         super().__init__()
@@ -24,7 +25,7 @@ class MFCloudNet(nn.Module):
         self.relu = nn.ReLU(inplace=False)
         self.sigmoid = nn.Sigmoid()
 
-        ### RBG Contracting Arm ###
+        ### RGB Contracting Arm ###
         self.contracting_1_rgb = ContractingArm(
             in_channels=16,
             out_channels=32,
