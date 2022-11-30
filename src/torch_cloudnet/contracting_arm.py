@@ -66,7 +66,7 @@ class ContractingArm(nn.Module):
 
 class ContractingArmNP(nn.Module):
     def __init__(self, in_channels: int, out_channels: int, kernel_size: int):
-        super(ContractingArm, self).__init__()
+        super(ContractingArmNP, self).__init__()
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.kernel_size = kernel_size
@@ -250,7 +250,7 @@ class ImprovedContractingArm(nn.Module):
 
 class ImprovedContractingArmNP(nn.Module):
     def __init__(self, in_channels: int, out_channels: int, kernel_size: int):
-        super(ImprovedContractingArm, self).__init__()
+        super(ImprovedContractingArmNP, self).__init__()
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.kernel_size = kernel_size

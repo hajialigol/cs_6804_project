@@ -11,7 +11,7 @@ class MFPCloudNet(nn.Module):
         super().__init__()
         self.n_classes = n_classes
         self.conv_init_rgb = nn.Conv2d(
-            in_channels=4,
+            in_channels=3,
             out_channels=16,
             kernel_size=(3, 3),
             padding='same'
@@ -163,7 +163,7 @@ class MFPCloudNet(nn.Module):
     def forward(self, x):
         ## initial convolution
         conv_0_rgb = self.conv_init_rgb(x[:,:3].float())
-        conv_0_nir = self.conv_init_nir(x[:,3].float())
+        conv_0_nir = self.conv_init_nir(x[:,3:].float())
         conv_0_rgb = conv_0_rgb + conv_0_nir
 
         ## contracting arm
