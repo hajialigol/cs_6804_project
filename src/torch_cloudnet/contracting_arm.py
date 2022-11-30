@@ -3,11 +3,12 @@ from torch import add, concat, stack, sum
 
 
 class ContractingArm(nn.Module):
-    def __init__(self, in_channels: int, out_channels: int, kernel_size: int):
+    def __init__(self, in_channels: int, out_channels: int, kernel_size: int, use_pooling: bool=True):
         super(ContractingArm, self).__init__()
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.kernel_size = kernel_size
+        self.use_pooling = use_pooling
         """
         for first forward pass, you'll have an input_tensor of size (w, h, 16). you'll have to
         explicitly state 
@@ -33,7 +34,8 @@ class ContractingArm(nn.Module):
             kernel_size=(1, 1),
             padding='same'
         )
-        self.max_pool = nn.MaxPool2d(kernel_size=(2, 2))
+        if self.use_pooling:
+            self.max_pool = nn.MaxPool2d(kernel_size=(2, 2))
         self.batch_norm = nn.BatchNorm2d(out_channels)
         self.batch_norm_green = nn.BatchNorm2d(in_channels)
         self.relu = nn.ReLU(inplace=False)
@@ -60,69 +62,11 @@ class ContractingArm(nn.Module):
         # think this is right
         blue = add(red_2, orange)
         blue = self.relu(blue)
+        if not self.use_pooling:
+            return blue
         purple = self.max_pool(blue)
         # blue = convx, purple = poolx
         return blue, purple
-
-class ContractingArmNP(nn.Module):
-    def __init__(self, in_channels: int, out_channels: int, kernel_size: int):
-        super(ContractingArmNP, self).__init__()
-        self.in_channels = in_channels
-        self.out_channels = out_channels
-        self.kernel_size = kernel_size
-        """
-        for first forward pass, you'll have an input_tensor of size (w, h, 16). you'll have to
-        explicitly state 
-        - in_channels = 16
-        - out_channels = 32 (same as filters in tf)
-        - kernel_size = 3 (same as kernel_size in tf)
-        """
-        self.red_conv_1 = nn.Conv2d(
-            in_channels=self.in_channels,
-            out_channels=self.out_channels,
-            kernel_size=(self.kernel_size, self.kernel_size),
-            padding="same"
-        )
-        self.red_conv_2 = nn.Conv2d(
-            in_channels=self.out_channels,
-            out_channels=self.out_channels,  # yes, this is on purpose
-            kernel_size=(self.kernel_size, self.kernel_size),
-            padding="same"
-        )
-        self.green_conv = nn.Conv2d(
-            in_channels=self.in_channels,
-            out_channels=self.in_channels,
-            kernel_size=(1, 1),
-            padding='same'
-        )
-        self.batch_norm = nn.BatchNorm2d(out_channels)
-        self.batch_norm_green = nn.BatchNorm2d(in_channels)
-        self.relu = nn.ReLU(inplace=False)
-        self.batch_relu = nn.Sequential(
-            self.batch_norm,
-            self.relu
-        )
-        self.batch_relu_green = nn.Sequential(
-            self.batch_norm_green,
-            self.relu
-        )
-
-    def forward(self, x):
-        red_1 = self.red_conv_1(x)
-        red_1 = self.batch_relu(red_1)
-        red_2 = self.red_conv_2(red_1)
-        red_2 = self.batch_relu(red_2)
-        green = self.green_conv(x)
-        green = self.batch_relu_green(green)
-        # will have to check out the dimension
-        # yeah, last dim is h (or w)
-        # need to concat across the channels, which is the 2nd dim (idx = 1)
-        orange = concat((x, green), dim=1)
-        # think this is right
-        blue = add(red_2, orange)
-        blue = self.relu(blue)
-        # blue = convx, purple = poolx
-        return blue
 
 class Bridge(nn.Module):
     def __init__(self, in_channels: int, out_channels: int, kernel_size: int):
@@ -177,11 +121,12 @@ class Bridge(nn.Module):
 
 
 class ImprovedContractingArm(nn.Module):
-    def __init__(self, in_channels: int, out_channels: int, kernel_size: int):
+    def __init__(self, in_channels: int, out_channels: int, kernel_size: int, use_pooling: bool=True):
         super(ImprovedContractingArm, self).__init__()
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.kernel_size = kernel_size
+        self.use_pooling = use_pooling
         self.red_conv_1 = nn.Conv2d(
             in_channels=in_channels,
             out_channels=out_channels,
@@ -227,7 +172,8 @@ class ImprovedContractingArm(nn.Module):
             self.batch_norm_green,
             self.relu
         )
-        self.max_pool = nn.MaxPool2d(kernel_size=(2, 2))
+        if self.use_pooling:
+            self.max_pool = nn.MaxPool2d(kernel_size=(2, 2))
 
     def forward(self, x):
         red_1 = self.red_conv_1(x)
@@ -244,76 +190,8 @@ class ImprovedContractingArm(nn.Module):
         tensor_to_add = stack([red_3, orange, green_bottom])
         blue = sum(tensor_to_add, dim=0)
         blue = self.relu(blue)
+        if not self.use_pooling:
+            return blue
         purple = self.max_pool(blue)
         # blue = convx, purple = poolx
         return blue, purple
-
-class ImprovedContractingArmNP(nn.Module):
-    def __init__(self, in_channels: int, out_channels: int, kernel_size: int):
-        super(ImprovedContractingArmNP, self).__init__()
-        self.in_channels = in_channels
-        self.out_channels = out_channels
-        self.kernel_size = kernel_size
-        self.red_conv_1 = nn.Conv2d(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=(kernel_size, kernel_size),
-            padding="same"
-        )
-        self.red_conv_2 = nn.Conv2d(
-            in_channels=out_channels,
-            out_channels=out_channels,
-            kernel_size=(kernel_size, kernel_size),
-            padding="same"
-        )
-        # same thing as red_conv_2, but implemented to make
-        # it look more obvious
-        self.red_conv_3 = nn.Conv2d(
-            in_channels=out_channels,
-            out_channels=out_channels,
-            kernel_size=(kernel_size, kernel_size),
-            padding="same"
-        )
-        self.top_green_conv = nn.Conv2d(
-            in_channels=in_channels,
-            out_channels=in_channels,
-            kernel_size=(1, 1),
-            padding="same"
-        )
-        # same thing as top_green_conv,
-        # but again, to make things look simpler
-        self.bottom_green_conv = nn.Conv2d(
-            in_channels=out_channels,
-            out_channels=out_channels,
-            kernel_size=(1, 1),
-            padding="same"
-        )
-        self.relu = nn.ReLU(inplace=False)
-        self.batch_norm = nn.BatchNorm2d(out_channels)
-        self.batch_norm_green = nn.BatchNorm2d(in_channels)
-        self.batch_relu = nn.Sequential(
-            self.batch_norm,
-            self.relu
-        )
-        self.batch_relu_green = nn.Sequential(
-            self.batch_norm_green,
-            self.relu
-        )
-
-    def forward(self, x):
-        red_1 = self.red_conv_1(x)
-        red_1 = self.batch_relu(red_1)
-        red_2 = self.red_conv_2(red_1)
-        red_2 = self.batch_relu(red_2)
-        red_3 = self.red_conv_3(red_2)
-        red_3 = self.batch_relu(red_3)
-        green_top = self.top_green_conv(x)
-        green_top = self.batch_relu_green(green_top)
-        orange = concat((x, green_top), dim=1)
-        green_bottom = self.bottom_green_conv(red_2)
-        green_bottom = self.batch_relu(green_bottom)
-        tensor_to_add = stack([red_3, orange, green_bottom])
-        blue = sum(tensor_to_add, dim=0)
-        blue = self.relu(blue)
-        # blue = convx, purple = poolx
-        return blue

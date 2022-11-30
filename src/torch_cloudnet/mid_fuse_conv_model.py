@@ -26,34 +26,39 @@ class MFCCloudNet(nn.Module):
         self.sigmoid = nn.Sigmoid()
 
         ### RGB Contracting Arm ###
-        self.contracting_1_rgb = ContractingArmNP(
+        self.contracting_1_rgb = ContractingArm(
             in_channels=16,
             out_channels=32,
-            kernel_size=3
+            kernel_size=3,
+            use_pooling=False
         )
         self.max_pool_1_rgb = nn.MaxPool2d(kernel_size=(2, 2))
-        self.contracting_2_rgb = ContractingArmNP(
+        self.contracting_2_rgb = ContractingArm(
             in_channels=32,
             out_channels=64,
-            kernel_size=3
+            kernel_size=3,
+            use_pooling=False
         )
         self.max_pool_2_rgb = nn.MaxPool2d(kernel_size=(2, 2))
-        self.contracting_3_rgb = ContractingArmNP(
+        self.contracting_3_rgb = ContractingArm(
             in_channels=64,
             out_channels=128,
-            kernel_size=3
+            kernel_size=3,
+            use_pooling=False
         )
         self.max_pool_3_rgb = nn.MaxPool2d(kernel_size=(2, 2))
-        self.contracting_4_rgb = ContractingArmNP(
+        self.contracting_4_rgb = ContractingArm(
             in_channels=128,
             out_channels=256,
-            kernel_size=3
+            kernel_size=3,
+            use_pooling=False
         )
         self.max_pool_4_rgb = nn.MaxPool2d(kernel_size=(2, 2))
-        self.improved_contracting_rgb = ImprovedContractingArmNP(
+        self.improved_contracting_rgb = ImprovedContractingArm(
             in_channels=256,
             out_channels=512,
-            kernel_size=3
+            kernel_size=3,
+            use_pooling=False
         )
         self.max_pool_5_rgb = nn.MaxPool2d(kernel_size=(2, 2))
         self.bridge_rgb = Bridge(
