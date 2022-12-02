@@ -49,17 +49,16 @@ def make_predictions(
         batch_ims, labels, batch_fnames = data
         batch_ims = batch_ims.to(args['device'])
         outputs = best_model(batch_ims)
-        for j in range(4):
-            try:
-                # returns a list of a tuple... yeah, idk lmao
-                fname = batch_fnames[0][j]
-                image_dict = {
-                    "output": outputs[j].detach(),
-                    "labels": labels[j].detach()
-                }
-                predictions_dict[fname] = image_dict
-            except:
-                break
+        # handles situation if the batch isn't evenly divisible by the amount of records
+        predictions_batch_size = data[0].shape[0]
+        for j in range(predictions_batch_size):
+            # returns a list of a tuple... yeah, idk lmao
+            fname = batch_fnames[0][j]
+            image_dict = {
+                "output": outputs[j].detach(),
+                "labels": labels[j].detach()
+            }
+            predictions_dict[fname] = image_dict
     save_predictions(predictions_dict=predictions_dict, write_path=predictions_path)
 
 
