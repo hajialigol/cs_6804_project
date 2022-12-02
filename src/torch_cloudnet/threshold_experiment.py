@@ -2,7 +2,6 @@ from argparse import ArgumentParser
 from datetime import datetime
 from math import isnan
 from pathlib import Path
-from pprint import pprint
 
 from sklearn.model_selection import train_test_split
 from tqdm import tqdm
