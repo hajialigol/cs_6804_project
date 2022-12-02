@@ -32,12 +32,17 @@ class CloudDataset(Dataset):
         target = resize(target, (self.img_rows, self.img_cols),
                         order=0, preserve_range=True, mode='symmetric', anti_aliasing=False)
 
+        # get file name to know which file corresponds to which predictions
+
         # Perform image augmentation
         if self.transform:
             images, target = self.transform_data(images, target)
 
+        # file name without color
+        normalized_fname = '_'.join(self.train_files[idx][0].name.split('_')[2:])
+
         # Switch to CHW format and convert to Dataset
-        return ToTensor()(images), ToTensor()(target)
+        return ToTensor()(images), ToTensor()(target), [normalized_fname]
 
     def transform_data(self, images, target):
         rnd_flip = np.random.randint(2, dtype=int)
@@ -62,4 +67,3 @@ class CloudDataset(Dataset):
         # images /= self.max_bit
         images = np.divide(images, self.max_bit)
         return images, target
-
