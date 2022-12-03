@@ -1,6 +1,6 @@
 from datetime import datetime
 from pathlib import Path
-from sklearn.metrics import precision_recall_fscore_support,\
+from sklearn.metrics import precision_recall_fscore_support, \
     accuracy_score, recall_score
 from torch import optim, save, tensor
 from torch.utils.data import DataLoader
@@ -10,7 +10,6 @@ from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 from cs_6804_project.src.torch_cloudnet.model import CloudNet
 from cs_6804_project.src.torch_cloudnet.arguments import TrainingArguments
-from cs_6804_project.src.keras_cloudnet.losses import jacc_coef_pt
 import numpy as np
 import logging
 
@@ -57,7 +56,7 @@ def train(model: CloudNet, criterion: Module, writer: SummaryWriter,
         model = model.to(args['device'])
         writer.flush()
         for data in tqdm(train_data):
-            batch_ims, labels = data
+            batch_ims, labels, _ = data
             batch_ims = batch_ims.to(args['device'])
             optimizer.zero_grad()
             outputs = model(batch_ims).to('cpu')
@@ -98,7 +97,7 @@ def eval(model: CloudNet, val_data: DataLoader):
     }
     jaccard = BinaryJaccardIndex()
     for data in tqdm(val_data):
-        batch_ims, targets = data
+        batch_ims, targets, _ = data
         outputs = model(batch_ims)
         results = outputs.detach().numpy().flatten()
         results = np.where(results > 0.05, 1, 0)
