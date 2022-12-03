@@ -16,7 +16,6 @@ def save_predictions(predictions_dict: Dict, write_path: Path):
 
 def read_predictions(read_path: Path):
     """
-
     :param read_path:
     :return:
     """
