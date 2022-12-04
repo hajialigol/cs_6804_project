@@ -15,7 +15,7 @@ import logging
 
 
 def train(model: CloudNet, criterion: Module, writer: SummaryWriter,
-          train_data: DataLoader, val_data: DataLoader, args):
+          train_data: DataLoader, val_data: DataLoader, args, model_id=''):
     """
     High-level method responsible for training CloudNet model
     :param model: Model that the given data will be trained on
@@ -69,21 +69,22 @@ def train(model: CloudNet, criterion: Module, writer: SummaryWriter,
                 writer.add_scalar("Training Loss", running_loss, i // record_loss_iters)
                 running_loss = 0
             if i % model_save_iters == 0:
-                path_name = f'../../models/cloudnet_epoch_{epoch}_iteration_{i}.pt'
+                path_name = f'../../models/{model_id}cloudnet_epoch_{epoch}_iteration_{i}.pt'
                 # create directory, if already existant
                 Path('../../models').mkdir(parents=True, exist_ok=True)
                 save(model.state_dict(), path_name)
                 print(f'Saved model after {i} batches.')
             i += 1
-        # Evaluate and save fully trained model
+        # Evaluate model after each epoch and log results
         eval_metric = eval(model, val_data)
         logging.debug(f'after epoch {epoch}, validation results are: {eval_metric}')
         print(f'average similarity for iteration {i} is {eval_metric}')
-        path_name = f'../../models/cloudnet_epoch_{iterations}_final.pt'
-        # create directory, if already existant
-        Path('../../models').mkdir(parents=True, exist_ok=True)
-        save(model.state_dict(), path_name)
-        print(f'Saved fully trained model.')
+    # Save fully trained model
+    path_name = f'../../models/{model_id}cloudnet_epoch_{iterations}_final.pt'
+    # create directory, if already existant
+    Path('../../models').mkdir(parents=True, exist_ok=True)
+    save(model.state_dict(), path_name)
+    print(f'Saved fully trained model.')
 
 def eval(model: CloudNet, val_data: DataLoader):
     model.eval()
