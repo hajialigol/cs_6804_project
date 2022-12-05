@@ -2,7 +2,6 @@ import keras
 import keras.backend as K
 from tqdm import tqdm
 
-
 class ADAMLearningRateTracker(keras.callbacks.Callback):
     """It prints out the last used learning rate after each epoch (useful for resuming a training)
     original code: https://github.com/keras-team/keras/issues/7874#issuecomment-329347949
@@ -44,7 +43,7 @@ def get_input_image_names(list_names, directory_name, if_train=True):
             list_msk.append(fl_msk)
 
         else:
-            dir_type_name = "testtt"
+            dir_type_name = "test"
             fl_img = []
             fl_id = '{}.TIF'.format(filenames)
             list_test_ids.append(fl_id)
@@ -68,3 +67,4 @@ def get_input_image_names(list_names, directory_name, if_train=True):
         return list_img, list_msk
     else:
         return list_img, list_test_ids
+        

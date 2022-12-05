@@ -122,3 +122,43 @@ def eval(model: CloudNet, val_data: DataLoader):
     # take average performance
     eval_dict = {k: v/len(val_data) for k,v in eval_dict.items()}
     return eval_dict
+
+def test(model, val_data, threshold):
+    model.eval()
+    model = model.to('cpu')
+    eval_dict = {
+        "jaccard": 0,
+        "precision": 0,
+        "recall": 0,
+        "specificity": 0,
+        "accuracy": 0
+    }
+    jaccard = BinaryJaccardIndex()
+    for data in tqdm(val_data):
+        batch_ims, targets, _ = data
+        outputs = model(batch_ims)
+        results = outputs.detach().numpy().flatten()
+        results = np.where(results > threshold, 1, 0)
+        labels = targets.detach().int().numpy().flatten()
+        eval_metric = precision_recall_fscore_support(
+            y_pred=results,
+            y_true=labels
+        )
+        eval_dict['precision'] += eval_metric[0][1]
+        eval_dict['recall'] += eval_metric[1][1]
+        jacc_score = jaccard(tensor(results), tensor(labels)).item()
+        if sum(results) == 0 and sum(labels) == 0:
+            jacc_score = 1
+        eval_dict['jaccard'] += jacc_score
+        eval_dict['accuracy'] += accuracy_score(
+            y_pred=results,
+            y_true=labels
+        )
+        eval_dict['specificity'] += recall_score(
+            y_true=results,
+            y_pred=labels,
+            pos_label=0
+        )
+    # take average performance
+    eval_dict = {k: v/len(val_data) for k,v in eval_dict.items()}
+    return eval_dict
