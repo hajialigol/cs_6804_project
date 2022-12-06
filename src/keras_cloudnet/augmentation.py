@@ -8,18 +8,21 @@ Some lines borrowed from: https://www.kaggle.com/sashakorekov/end-to-end-resnet5
 
 
 def rotate_clk_img_and_msk(img, msk):
+    np.random.seed(42)
     angle = np.random.choice((4, 6, 8, 10, 12, 14, 16, 18, 20))
     img_o = trans.rotate(img, angle, resize=False, preserve_range=True, mode='symmetric', order=0)
     msk_o = trans.rotate(msk, angle, resize=False, preserve_range=True, mode='symmetric', order=0)
     return img_o, msk_o
 
 def rotate_cclk_img_and_msk(img, msk):
+    np.random.seed(42)
     angle = np.random.choice((-20, -18, -16, -14, -12, -10, -8, -6, -4))
     img_o = trans.rotate(img, angle, resize=False, preserve_range=True, mode='symmetric', order=0)
     msk_o = trans.rotate(msk, angle, resize=False, preserve_range=True, mode='symmetric', order=0)
     return img_o, msk_o
 
 def flipping_img_and_msk(img, msk):
+    np.random.seed(42)
     # Use .copy() to avoid 'negative strides' in numpy
     # Otherwise, conversion to Tensor will fail
     img_o = np.flip(img, axis=1).copy()
@@ -27,7 +30,7 @@ def flipping_img_and_msk(img, msk):
     return img_o, msk_o
 
 def zoom_img_and_msk(img, msk):
-
+    np.random.seed(42)
     zoom_factor = np.random.choice((1.2, 1.5, 1.8, 2, 2.2, 2.5))  # currently doesn't have zoom out!
     h, w = img.shape[:2]
 

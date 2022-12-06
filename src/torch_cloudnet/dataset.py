@@ -6,8 +6,6 @@ from skimage.transform import resize
 from torchvision.transforms import ToTensor
 from cs_6804_project.src.keras_cloudnet.augmentation import *
 
-seed(42)
-
 class CloudDataset(Dataset):
     def __init__(self, train_files, target_files, img_rows, img_cols, max_bit, transform=True):
         self.train_files = train_files
@@ -47,6 +45,7 @@ class CloudDataset(Dataset):
         return ToTensor()(images), ToTensor()(target), [normalized_fname]
 
     def transform_data(self, images, target):
+        np.random.seed(42)
         rnd_flip = np.random.randint(2, dtype=int)
         rnd_rotate_clk = np.random.randint(2, dtype=int)
         rnd_rotate_cclk = np.random.randint(2, dtype=int)
