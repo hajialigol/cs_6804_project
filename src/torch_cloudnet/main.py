@@ -9,6 +9,7 @@ from cs_6804_project.src.torch_cloudnet.model import CloudNet
 from cs_6804_project.src.torch_cloudnet.arguments import TrainingArguments
 from cs_6804_project.src.torch_cloudnet.train import train
 from cs_6804_project.src.torch_cloudnet.losses import JaccardLoss
+from cs_6804_project.src.cloudnet_95 import read_cloudnet
 from argparse import ArgumentParser
 
 if __name__ == "__main__":
@@ -23,7 +24,7 @@ if __name__ == "__main__":
 
     GLOBAL_PATH = Path('../../data')
     TRAIN_FOLDER = GLOBAL_PATH / '38-Cloud_training'
-    TEST_FOLDER = GLOBAL_PATH / '38-Cloud_test'
+    TEST_FOLDER = GLOBAL_PATH / '95-cloud_training_only_additional_to38-cloud'
     LOG_DIR = "you must choose a path wisely, Neil"
     writer = SummaryWriter(log_dir=LOG_DIR)
     in_rows = 192
@@ -41,11 +42,11 @@ if __name__ == "__main__":
 
     # getting input images names
     train_patches_csv_name = 'training_patches_38-cloud_nonempty.csv'
-    test_patches_csv_name = 'testing_patches_38-cloud_nonempty.csv'
+    test_patches_csv_name = 'evaluation_testing_patches_nonempty.csv'
     df_train_img = pd.read_csv(TRAIN_FOLDER / train_patches_csv_name)
     df_test_img = pd.read_csv(TEST_FOLDER / test_patches_csv_name)
 
-    test_img, test_msk = get_input_image_names(df_test_img, TEST_FOLDER, if_train=True)
+    test_img, test_msk = read_cloudnet(test_eval_df=df_test_img, cloudnet_95_path=TEST_FOLDER)
     train_img, train_msk = get_input_image_names(df_train_img, TRAIN_FOLDER, if_train=True)
     # train_img = train_img[:100]
     # train_msk = train_msk[:100]
