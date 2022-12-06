@@ -89,7 +89,7 @@ def optimize_threshold(predictions_fname: str = 'best_predictions.pickle') -> Di
                     print(f'score is {score}, sum of results and labels are {sum(results)} and {sum(labels)}')
             threshold_jaccard = score
             threshold_dict[threshold] += threshold_jaccard
-        print(f'threshold: {threshold}, score sum: {threshold_dict[threshold]}')
+        #print(f'threshold: {threshold}, score sum: {threshold_dict[threshold]}')
         threshold = round(threshold + 0.001, 3)
         i += 1
         # pprint(f"results: {threshold_dict}")

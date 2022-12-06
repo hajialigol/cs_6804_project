@@ -27,7 +27,7 @@ def read_cloudnet(test_eval_df: pd.DataFrame, cloudnet_95_path: Path):
     for blue_file in tqdm(blue_dir):
         base_name = '_'.join(blue_file.split('_')[1:])
         search_name = base_name.replace('.TIF', '').strip()
-        if search_name in blue_file:
+        if search_name in test_eval_fnames:
             image_list = []
 
             red_file = red_path / ('red_' + base_name)

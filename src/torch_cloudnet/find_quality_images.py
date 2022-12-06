@@ -1,6 +1,7 @@
 from pathlib import Path
 from tqdm import tqdm
 from numpy import ndarray
+import matplotlib.pyplot as plt
 import pandas as pd
 import os
 from skimage.io import imread
@@ -33,17 +34,17 @@ def _validate_test_ims(img: ndarray, num_pixel_thold: float = 0.8, intensity_tho
             nwrong += 1 if img[row][col] < intensity_thold else 0
     return (nwrong / nvals) < num_pixel_thold
 
-def validate_test_ims(folder_path: Path):
+def validate_test_ims(folder_path: Path, existing_nonempty: pd.DataFrame):
     """
     Function responsible for determining if images are valid or not
     :param folder_path: test folder path
     :type folder_path: Path
     :return:
     """
-    blue_path = folder_path / 'test_blue'
-    red_path = folder_path / 'test_red'
-    green_path = folder_path / 'test_green'
-    nir_path = folder_path / 'test_nir'
+    blue_path = folder_path / 'train_blue_additional_to38cloud'
+    red_path = folder_path / 'train_red_additional_to38cloud'
+    green_path = folder_path / 'train_green_additional_to38cloud'
+    nir_path = folder_path / 'train_nir_additional_to38cloud'
 
     blue_files = os.listdir(blue_path)
     red_files = os.listdir(red_path)
@@ -55,19 +56,24 @@ def validate_test_ims(folder_path: Path):
 
     for idx in tqdm(range(len(blue_files)), total=len(blue_files)):
         blue = blue_files[idx]
+        patch_name = blue.replace('blue_', '')[:-4]
+        if (patch_name not in existing_nonempty['name'].values):
+            continue
         blue_sum = sum(sum(imread(blue_path / blue)))
         red_sum = sum(sum(imread(red_path / red_files[idx])))
         green_sum = sum(sum(imread(green_path / green_files[idx])))
         nir_sum = sum(sum(imread(nir_path / nir_files[idx])))
         intensities = blue_sum + red_sum + nir_sum + green_sum
         valid_check = intensities > 100
+        #if 0 in imread(blue_path / blue):
+            #plt.imshow(imread(blue_path / blue))
+            #plt.show()
         im_sums.append(intensities)
         if valid_check:
-            patch_name = blue.replace('blue_', '')
             valid_list.append(patch_name)
 
     valid_test_ims = pd.DataFrame(data={"name": valid_list})
-    valid_test_ims.to_csv(folder_path / 'testing_patches_38-cloud_nonempty.csv', index=False)
+    valid_test_ims.to_csv(folder_path / 'updated_evaluation_testing_patches_nonempty.csv', index=False)
 
 
 if __name__ == "__main__":
