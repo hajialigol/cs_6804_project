@@ -1,10 +1,12 @@
 import numpy as np
+from random import seed
 from torch.utils.data import Dataset
 from skimage.io import imread
 from skimage.transform import resize
 from torchvision.transforms import ToTensor
 from cs_6804_project.src.keras_cloudnet.augmentation import *
 
+seed(42)
 
 class CloudDataset(Dataset):
     def __init__(self, train_files, target_files, img_rows, img_cols, max_bit, transform=True):
@@ -59,8 +61,8 @@ class CloudDataset(Dataset):
         if rnd_rotate_cclk == 1:
             images, target = rotate_cclk_img_and_msk(images, target)
 
-        if rnd_zoom == 1:
-            images, target = zoom_img_and_msk(images, target)
+        # if rnd_zoom == 1:
+        #     images, target = zoom_img_and_msk(images, target)
 
         # target /= 255
         target = np.divide(target, 255)
