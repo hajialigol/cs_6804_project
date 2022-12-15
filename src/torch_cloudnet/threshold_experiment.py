@@ -70,11 +70,11 @@ def optimize_threshold(predictions_fname: str = 'best_predictions.pickle') -> Di
     """
     predictions_path = Path(f'../../data/best_validation_predictions/{predictions_fname}')
     predictions = read_predictions(read_path=predictions_path)
-    threshold_dict = {round(0.001 + i/1000, 3): 0 for i in range(999)}
+    threshold_dict = {round(0.005 + i/200, 3): 0 for i in range(199)}
     jaccard = BinaryJaccardIndex()
-    threshold = 0.001
+    threshold = 0.005
     i = 0
-    while threshold <= 0.999:
+    while threshold <= 0.995:
         for fname, vals in tqdm(predictions.items()):
             outputs = vals['output'].cpu()
             labels = vals['labels'].cpu()
@@ -90,7 +90,7 @@ def optimize_threshold(predictions_fname: str = 'best_predictions.pickle') -> Di
             threshold_jaccard = score
             threshold_dict[threshold] += threshold_jaccard
         print(f'threshold: {threshold}, score sum: {threshold_dict[threshold]}')
-        threshold = round(threshold + 0.001, 3)
+        threshold = round(threshold + 0.005, 3)
         i += 1
         # pprint(f"results: {threshold_dict}")
     threshold_dict = {k: v/len(predictions) for k,v in threshold_dict.items()}
